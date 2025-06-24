@@ -1,0 +1,60 @@
+import axios from 'axios';
+import type { Product, PaginatedResponse } from '../types/product'
+
+const API_BASE_URL = "http://localhost:9090/products";
+
+export const fetchPaginatedProducts = async (page: number, size: number) => {
+    const response = await axios.get<PaginatedResponse<Product>>(`${API_BASE_URL}/paginated?page=${page}&size=${size}`);
+    return response.data;
+};
+
+export async function getAllProducts() {
+    const response = await fetch(API_BASE_URL);
+    if (!response.ok) {
+        throw new Error("Error fetching products");
+    }
+    return response.json();
+    }
+
+    export async function createProduct(product: any) {
+    const response = await fetch(API_BASE_URL, {
+        method: "POST",
+        headers: {
+        "Content-Type": "application/json",
+        },
+        body: JSON.stringify(product),
+    });
+
+    if (!response.ok) {
+        throw new Error("Error creating product");
+    }
+
+    return response.json();
+}
+
+export async function updateProduct(id: number, product: any) {
+    const response = await fetch(`${API_BASE_URL}/${id}`, {
+        method: "PUT",
+        headers: {
+        "Content-Type": "application/json",
+        },
+        body: JSON.stringify(product),
+    });
+
+    if (!response.ok) {
+        throw new Error("Error updating product");
+    }
+
+    return response.json();
+}
+
+export async function deleteProduct(id: number) {
+    const response = await fetch(`http://localhost:9090/products/${id}`, {
+        method: 'DELETE'
+    })
+
+    if (!response.ok) {
+        throw new Error('Error deleting product')
+    }
+}
+
