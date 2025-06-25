@@ -3,12 +3,10 @@ import { useState } from 'react'
 
 type Props = {
     onSearch: (filters: { name: string; categories: string[]; inStock?: boolean }) => void
+    existingCategories: string[]
 }
 
-const categoriesList = ['Food', 'Clothing', 'Electronics']
-
-
-export default function ProductFilters({ onSearch }: Props) {
+export default function ProductFilters({ onSearch, existingCategories }: Props) {
     const [name, setName] = useState('')
     const [categories, setCategories] = useState<string[]>([])
     const [availability, setAvailability] = useState('all')
@@ -19,7 +17,7 @@ export default function ProductFilters({ onSearch }: Props) {
         name,
         categories,
         inStock:
-            availability === 'in' ? true : availability === 'out' ? false : undefined,
+            availability === 'inStock' ? true : availability === 'outOfStock' ? false : undefined,
         })
     }
 
@@ -54,10 +52,10 @@ export default function ProductFilters({ onSearch }: Props) {
             input={<OutlinedInput label="Category" />}
             renderValue={(selected) => selected.join(', ')}
             >
-            {categoriesList.map((cat) => (
+            {existingCategories.map((cat) => (
                 <MenuItem key={cat} value={cat}>
-                <Checkbox checked={categories.includes(cat)} />
-                <ListItemText primary={cat} />
+                    <Checkbox checked={categories.includes(cat)} />
+                    <ListItemText primary={cat} />
                 </MenuItem>
             ))}
             </Select>
@@ -80,9 +78,6 @@ export default function ProductFilters({ onSearch }: Props) {
             Search
         </Button>
 
-        <Button variant="outlined" color="secondary">
-            New Product
-        </Button>
         </Box>
     )
 }
