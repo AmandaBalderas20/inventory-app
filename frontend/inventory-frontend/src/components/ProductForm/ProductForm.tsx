@@ -1,59 +1,162 @@
-import { useForm } from 'react-hook-form'
-import type { ProductFormInput } from '../../types/product'
+import {
+    Dialog,
+    DialogTitle,
+    DialogContent,
+    DialogActions,
+    Button,
+    TextField,
+    MenuItem,
+    Select,
+    InputLabel,
+    FormControl
+} from '@mui/material'
+import { useEffect, useState } from 'react'
+import type { Product } from '../../types/product'
+import type { SelectChangeEvent } from '@mui/material/Select'
 
-type Props = {
-    initialData?: ProductFormInput
-    onSubmit: (data: ProductFormInput) => void
-    onCancel?: () => void
+interface Props {
+    open: boolean
+    onClose: () => void
+    onSave: (product: Product) => void
+    product?: Product
+    existingCategories: string[]
 }
 
-const categoryOptions = ['Beverages', 'Snacks', 'Fruits'] // esto se puede traer de la API después
-
-export function ProductForm({ initialData, onSubmit, onCancel }: Props) {
-    const {
-        register,
-        handleSubmit,
-        formState: { errors },
-    } = useForm<ProductFormInput>({
-        defaultValues: initialData ?? {
+export default function ProductFormDialog({
+    open,
+    onClose,
+    onSave,
+    product,
+    existingCategories
+}: Props) {
+    const [form, setForm] = useState<Product>({
+        id: 0,
         name: '',
         category: '',
-        quantity: 0,
-        price: 0,
+        stockQuantity: 0,
+        unitPrice: 0,
         expirationDate: '',
-        },
+        outOfStock: false
     })
 
-    return (
-        <div className="min-h-screen bg-white text-black p-8">
-            <form onSubmit={handleSubmit(onSubmit)} className="max-w-md space-y-4 p-4 border border-gray-400 rounded shadow-sm">
-            <div>
-                <label className="block mb-1">Name</label>
-                <input
-                className="w-full border p-2"
-                {...register('name', { required: 'Name is required' })}
-                />
-                {errors.name && <span className="text-red-500 text-sm">{errors.name.message}</span>}
-            </div>
+    useEffect(() => {
+        if (product) {
+            setForm(product)
+        } else {
+            setForm({
+                id: 0,
+                name: '',
+                category: '',
+                stockQuantity: 0,
+                unitPrice: 0,
+                expirationDate: '',
+                outOfStock: false
+            })
+        }
+    }, [product])
 
-            <div className="flex justify-end space-x-4 mt-4">
-                <button
-                type="submit"
-                className="px-4 py-2 bg-gray-800 text-white rounded hover:bg-gray-700"
-                >
-                Save
-                </button>
-                {onCancel && (
-                <button
-                    type="button"
-                    className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400"
-                    onClick={onCancel}
-                >
-                    Cancel
-                </button>
-                )}
-            </div>
-            </form>
-        </div>        
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const { name, value } = e.target
+        setForm((prev) => ({ ...prev, [name]: value }))
+    }
+
+        const handleSelectChange = (e: SelectChangeEvent<string>) => {
+        const { name, value } = e.target
+        if (!name) return
+        setForm((prev) => ({ ...prev, [name]: value }))
+    }
+
+    const handleCategoryChange = (e: SelectChangeEvent<string>) => {
+        const value = e.target.value
+        if (value !== 'custom') {
+            setCustomCategory('') // limpia si se cambia de opción
+        }
+        setForm((prev) => ({ ...prev, category: value }))
+    }
+
+    const handleSave = () => {
+        const finalProduct: Product = {
+            ...form,
+            category: form.category === 'custom' ? customCategory : form.category,
+        }
+        onSave(finalProduct)
+    }
+
+    const [customCategory, setCustomCategory] = useState('')
+
+    return (
+        <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
+        <DialogTitle sx={{ mb: 1 }}>{product ? 'Edit Product' : 'New Product'}</DialogTitle>
+        <DialogContent sx={{ px: 3, pt: 5, pb: 2, display: 'flex', flexDirection: 'column', gap: 3 }}>
+            <TextField label="Name" name="name" value={form.name} onChange={handleInputChange} fullWidth />
+
+            <FormControl fullWidth>
+            <InputLabel>Category</InputLabel>
+            <Select
+                label="Category"
+                name="category"
+                value={form.category}
+                onChange={handleCategoryChange}
+            >
+                {existingCategories.map((cat) => (
+                <MenuItem key={cat} value={cat}>{cat}</MenuItem>
+                ))}
+                <MenuItem value="custom">Other (type manually)</MenuItem>
+            </Select>
+            </FormControl>
+
+            {form.category === 'custom' && (
+                <TextField
+                    label="Custom Category"
+                    value={customCategory}
+                    onChange={(e) => setCustomCategory(e.target.value)}
+                    fullWidth
+                />
+            )}
+
+            <TextField
+            label="Stock"
+            name="stockQuantity"
+            type="number"
+            value={String(form.stockQuantity)}
+            onChange={handleInputChange}
+            fullWidth
+            />
+
+            <TextField
+            label="Unit Price"
+            name="unitPrice"
+            type="number"
+            value={String(form.unitPrice)}
+            onChange={handleInputChange}
+            fullWidth
+            />
+
+            <TextField
+            label="Expiration Date"
+            name="expirationDate"
+            type="date"
+            value={form.expirationDate}
+            onChange={handleInputChange}
+            InputLabelProps={{ shrink: true }}
+            fullWidth
+            inputProps={{
+                min: new Date(Date.now() - new Date().getTimezoneOffset() * 60000)
+                        .toISOString()
+                        .split("T")[0],
+            }}
+            />
+        </DialogContent>
+        <DialogActions>
+            <Button onClick={onClose}>Cancel</Button>
+            <Button
+                variant="contained"
+                onClick={handleSave}
+                disabled={!form.name || !form.category || form.unitPrice < 0 || form.stockQuantity < 0}
+            >
+                {product ? 'Update' : 'Save'}
+            </Button>
+        </DialogActions>
+        </Dialog>
     )
 }
