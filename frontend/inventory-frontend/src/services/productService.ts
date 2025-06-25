@@ -26,11 +26,12 @@ export async function getAllProducts() {
     });
 
     if (!response.ok) {
-        throw new Error("Error creating product");
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Error creating product");
     }
 
     return response.json();
-}
+    }
 
 export async function updateProduct(id: number, product: any) {
     const response = await fetch(`${API_BASE_URL}/${id}`, {
@@ -58,3 +59,26 @@ export async function deleteProduct(id: number) {
     }
 }
 
+export async function fetchFilteredProducts(filters: {
+    name?: string
+    categories?: string[]
+    inStock?: boolean
+    }) {
+    const params = new URLSearchParams()
+
+    if (filters.name) params.append('name', filters.name)
+    if (filters.categories && filters.categories.length > 0) {
+        filters.categories.forEach((cat) => params.append('category', cat))
+    }
+    if (filters.inStock !== undefined) {
+        params.append('inStock', String(filters.inStock))
+    }
+
+    const response = await fetch(`http://localhost:9090/products?${params.toString()}`)
+
+    if (!response.ok) {
+        throw new Error('Failed to fetch filtered products')
+    }
+
+    return response.json()
+}

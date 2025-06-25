@@ -4,11 +4,11 @@ import { ProductTable } from '../components/ProductTable/ProductTable'
 import ProductFilters from '../components/ProductFilters/ProductFilters'
 import ProductForm from '../components/ProductForm/ProductForm'
 
-import type { Product, PaginatedResponse } from '../types/product'
-import { deleteProduct, fetchPaginatedProducts, createProduct, updateProduct} from '../services/productService'
+import type { Product } from '../types/product'
+import { deleteProduct, fetchPaginatedProducts, createProduct, updateProduct, fetchFilteredProducts} from '../services/productService'
 
 import { Pagination, Stack } from '@mui/material'
-import { Container, Typography, Box } from '@mui/material'
+import { Container, Typography, Box, Button } from '@mui/material'
 
 
 export default function ProductListPage() {
@@ -18,6 +18,10 @@ export default function ProductListPage() {
     const [loading, setLoading] = useState(true)
     const [dialogOpen, setDialogOpen] = useState(false)
     const [selectedProduct, setSelectedProduct] = useState<Product | undefined>(undefined)
+    const allCategories = [...new Set(products.map(p => p.category))]
+    const [isFormOpen, setIsFormOpen] = useState(false)
+    const [editingProduct, setEditingProduct] = useState<Product | undefined>(undefined)
+
 
     function handleDelete(id: number) {
     if (!confirm('Are you sure you want to delete this item?')) return
@@ -35,6 +39,44 @@ export default function ProductListPage() {
                 console.error(err)
                 alert('An error occurred while deleting the product')
             })
+    }
+
+    const handleSave = async (productData: Product) => {
+        try {
+            if (productData.id) {
+            // If ID exists, update product
+            await updateProduct(productData.id, productData);
+            } else {
+            // If no ID, create new product
+            await createProduct(productData);
+            }
+
+            // Refresh products
+            const updated = await fetchPaginatedProducts(page, 10);
+            setProducts(updated.content);
+            setTotalPages(updated.totalPages);
+
+            // Close form dialog
+            setIsFormOpen(false);
+            setEditingProduct(undefined);
+        } catch (err: any) {
+            alert(err.message); // ejemplo: "A product with this name already exists"
+        }
+    };
+
+
+    const handleSearch = async (filters: {
+        name?: string
+        categories?: string[]
+        inStock?: boolean
+    }) => {
+        try {
+        const results = await fetchFilteredProducts(filters)
+        setProducts(results)
+        } catch (err) {
+        console.error(err)
+        alert('Error fetching filtered products')
+        }
     }
 
     const fetchProducts = async () => {
@@ -83,10 +125,22 @@ export default function ProductListPage() {
 
             <Box mb={4}>
             <ProductFilters
-                onSearch={(filters) => {
-                console.log('Filtros aplicados:', filters)
-                }}
+                onSearch={(handleSearch)}
+                existingCategories={allCategories}
             />
+            </Box>
+
+            <Box display="flex" justifyContent="flex-start" mb={2}>
+                <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={() => {
+                    setEditingProduct(undefined)
+                    setIsFormOpen(true)
+                    }}
+                >
+                    New Product
+                </Button>
             </Box>
 
             <ProductForm
@@ -116,7 +170,6 @@ export default function ProductListPage() {
                 setSelectedProduct(product)
                 setDialogOpen(true)
             }}
-
             onDelete={handleDelete}
             onToggleStock={(id, inStock) =>
                 alert(`Marcar ${id} como ${inStock ? 'en stock' : 'sin stock'}`)
@@ -132,6 +185,14 @@ export default function ProductListPage() {
                 variant="outlined"
             />
             </Stack>
+
+            <ProductForm
+                open={isFormOpen}
+                onClose={() => setIsFormOpen(false)}
+                onSave={handleSave}
+                product={editingProduct}
+                existingCategories={[...new Set(products.map((p) => p.category))]}
+            />
         </Container>
     )
 }

@@ -27,10 +27,17 @@ public class ProductService {
      * @return List of all products.
      */
     public Product createProduct(@Valid Product product) {
+        boolean exists = repository.findAll().stream()
+        .anyMatch(p -> p.getName().equalsIgnoreCase(product.getName()));
+
+        if (exists) {
+            throw new IllegalArgumentException("Product with the same name already exists.");
+        }
+
         product.setId((long) nextId++);
         product.setCreationDate(LocalDate.now());
         product.setLastUpdatedDate(LocalDate.now());
-        // product.setOutOfStock(product.getStockQuantity() <= 0);
+        
         return repository.save(product);
     }
 
@@ -54,7 +61,7 @@ public class ProductService {
             .filter(p -> name == null || p.getName().toLowerCase().contains(name.toLowerCase()))
             .filter(p -> categories == null || categories.isEmpty() || categories.stream().anyMatch(cat -> 
                 p.getCategory().toLowerCase().trim().contains(cat.toLowerCase().trim())))
-            .filter(p -> inStock == null || (inStock ? !p.isOutOfStock() : p.isOutOfStock()))
+            .filter(p -> inStock == null || (inStock ? p.getStockQuantity() > 0 : p.getStockQuantity() <= 0))
             .toList();
     }
 
