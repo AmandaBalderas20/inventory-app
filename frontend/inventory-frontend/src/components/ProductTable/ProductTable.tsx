@@ -32,9 +32,9 @@ export function ProductTable({ products, onEdit, onDelete, onToggleStock }: Prop
         const date = new Date(exp)
         const diffDays = (date.getTime() - now.getTime()) / (1000 * 3600 * 24)
 
-        if (diffDays < 7) return '#ffe6e6'
-        if (diffDays < 14) return '#fff9c4'
-        return '#e8f5e9'
+        if (diffDays < 7) return '#ffe6e6' // red
+        if (diffDays < 14) return '#fff9c4' // yellow
+        return '#e8f5e9' // green
     }
 
     return (

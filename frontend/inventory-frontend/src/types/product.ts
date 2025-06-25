@@ -1,12 +1,12 @@
 export type Product = {
-    id: string
+    id: number
     name: string
     category: string
     unitPrice: number
     stockQuantity: number
     expirationDate?: string 
-    creationDate: string
-    lastUpdatedDate: string
+    creationDate?: string
+    lastUpdatedDate?: string
     outOfStock?: boolean 
 }
 
