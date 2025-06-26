@@ -90,9 +90,13 @@ public class ProductController {
     @GetMapping("/paginated")
     public PageResponse<Product> getPaginatedProducts(
         @RequestParam int page,
-        @RequestParam int size
+        @RequestParam int size,
+        @RequestParam(required = false) String sortBy1,
+        @RequestParam(required = false) String direction1,
+        @RequestParam(required = false) String sortBy2,
+        @RequestParam(required = false) String direction2
     ) {
-        return productService.getPaginatedProducts(page, size);
+        return productService.getPaginatedProducts(page, size, sortBy1, direction1, sortBy2, direction2);
     }
 
     @GetMapping("/metrics")
