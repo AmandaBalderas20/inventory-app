@@ -22,10 +22,10 @@ export default function ProductListPage() {
     const allCategories = [...new Set(products.map(p => p.category))]
     const [isFormOpen, setIsFormOpen] = useState(false)
     const [editingProduct, setEditingProduct] = useState<Product | undefined>(undefined)
-    const [sortBy1, setSortBy1] = useState<string | undefined>()
-    const [direction1, setDirection1] = useState<'asc' | 'desc' | undefined>()
-    const [sortBy2, setSortBy2] = useState<string | undefined>()
-    const [direction2, setDirection2] = useState<'asc' | 'desc' | undefined>()
+    const [sortBy1, setSortBy1] = useState<string | undefined>(undefined)
+    const [direction1, setDirection1] = useState<'asc' | 'desc' | undefined>(undefined)
+    const [sortBy2, setSortBy2] = useState<string | undefined>(undefined)
+    const [direction2, setDirection2] = useState<'asc' | 'desc' | undefined>(undefined)
 
 
     function handleDelete(id: number) {
@@ -202,7 +202,6 @@ export default function ProductListPage() {
                 direction1={direction1 || 'asc'}
                 sortBy2={sortBy2 || ''}
                 direction2={direction2 || 'asc'}
-                
                 onSortChange={(column) => {
                     if (sortBy1 === column) {
                         if (direction1 === 'asc') {
@@ -233,8 +232,8 @@ export default function ProductListPage() {
                         setDirection2('asc')
                     }
                 }}
-            />
-            
+                />
+
             <Stack spacing={2} alignItems="center" mt={4}>
             <Pagination
                 count={totalPages}

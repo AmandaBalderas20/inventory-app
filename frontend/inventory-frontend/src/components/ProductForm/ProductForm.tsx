@@ -39,30 +39,10 @@ export default function ProductFormDialog({
         outOfStock: false
     })
 
-    useEffect(() => {
-        if (product) {
-            setForm(product)
-        } else {
-            setForm({
-                id: 0,
-                name: '',
-                category: '',
-                stockQuantity: 0,
-                unitPrice: 0,
-                expirationDate: '',
-                outOfStock: false
-            })
-        }
-    }, [product])
+    const [customCategory, setCustomCategory] = useState('')
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target
-        setForm((prev) => ({ ...prev, [name]: value }))
-    }
-
-        const handleSelectChange = (e: SelectChangeEvent<string>) => {
-        const { name, value } = e.target
-        if (!name) return
         setForm((prev) => ({ ...prev, [name]: value }))
     }
 
@@ -82,7 +62,22 @@ export default function ProductFormDialog({
         onSave(finalProduct)
     }
 
-    const [customCategory, setCustomCategory] = useState('')
+    useEffect(() => {
+        if (product) {
+            setForm(product)
+        } else {
+            setForm({
+                id: 0,
+                name: '',
+                category: '',
+                stockQuantity: 0,
+                unitPrice: 0,
+                expirationDate: '',
+                outOfStock: false
+            })
+            setCustomCategory('')
+        }
+    }, [product, open])
 
     return (
         <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
