@@ -252,7 +252,7 @@ export default function ProductListPage() {
                 existingCategories={[...new Set(products.map((p) => p.category))]}
             />
 
-            <InventoryMetrics />
+            <InventoryMetrics products={products} />
         </Container>
     )
 }

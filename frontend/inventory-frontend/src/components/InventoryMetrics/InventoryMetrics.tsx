@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { fetchInventoryMetrics } from '../../services/productService'
 import type { InventoryMetric } from '../../types/metrics'
+import type { Product } from '../../types/product'
 
 import {
     Table,
@@ -13,7 +14,11 @@ import {
     Typography
     } from '@mui/material'
 
-    export default function InventoryMetrics() {
+    type Props = {
+        products: Product[]
+    }
+
+export default function InventoryMetrics({ products }: Props) {
     const [metrics, setMetrics] = useState<InventoryMetric[]>([])
 
     useEffect(() => {
