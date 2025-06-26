@@ -21,6 +21,17 @@ export default function ProductFilters({ onSearch, existingCategories }: Props) 
         })
     }
 
+    const handleClear = () => {
+        setName('')
+        setCategories([])
+        setAvailability('all')
+        onSearch({
+            name: '',
+            categories: [],
+            inStock: undefined,
+        })
+    }
+
     return (
     <Box
         component="form"
@@ -78,6 +89,9 @@ export default function ProductFilters({ onSearch, existingCategories }: Props) 
             Search
         </Button>
 
-        </Box>
+        <Button variant="outlined" color="primary" onClick={handleClear}>
+            Clear Filters
+        </Button>
+    </Box>
     )
 }
