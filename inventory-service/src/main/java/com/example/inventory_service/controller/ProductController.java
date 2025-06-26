@@ -1,4 +1,5 @@
 package com.example.inventory_service.controller;
+import com.example.inventory_service.model.InventoryMetric;
 import com.example.inventory_service.model.Product;
 import com.example.inventory_service.service.ProductService;
 import com.example.inventory_service.dto.PageResponse;
@@ -93,5 +94,11 @@ public class ProductController {
     ) {
         return productService.getPaginatedProducts(page, size);
     }
+
+    @GetMapping("/metrics")
+        public List<InventoryMetric> getInventoryMetrics() {
+            return productService.getInventoryMetrics();
+    }
+
 
 }

@@ -2,6 +2,7 @@ package com.example.inventory_service.service;
 
 import com.example.inventory_service.dto.PageResponse;
 import com.example.inventory_service.model.Product;
+import com.example.inventory_service.model.InventoryMetric;
 import com.example.inventory_service.repository.InMemoryProductRepository;
 
 import jakarta.validation.Valid;
@@ -9,8 +10,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.stream.Collectors;
 
 @Service
 @Validated
@@ -99,6 +103,11 @@ public class ProductService {
         repository.deleteById(id);
     }
 
+    /**
+     * Retrieves a product by its ID.
+     * @param id The ID of the product to retrieve.
+     * @return The product with the specified ID.
+     */
     public PageResponse<Product> getPaginatedProducts(int page, int size) {
         List<Product> allProducts = this.repository.findAll();
         int fromIndex = page * size;
@@ -112,5 +121,42 @@ public class ProductService {
 
         return new PageResponse<>(paginatedList, page, size, allProducts.size());
     }
+
+    /**
+     * Retrieves inventory metrics grouped by product category.
+     * @return List of InventoryMetric objects containing metrics for each category.
+     */
+    public List<InventoryMetric> getInventoryMetrics() {
+        Map<String, List<Product>> grouped = repository.findAll().stream()
+            .filter(p -> !p.isOutOfStock())
+            .collect(Collectors.groupingBy(Product::getCategory));
+
+        List<InventoryMetric> metrics = new ArrayList<>();
+
+        int overallTotalProducts = 0;
+        double overallTotalValue = 0;
+
+        for (Map.Entry<String, List<Product>> entry : grouped.entrySet()) {
+            String category = entry.getKey();
+            List<Product> products = entry.getValue();
+
+            int totalQty = products.stream().mapToInt(Product::getStockQuantity).sum();
+            double totalValue = products.stream()
+                .mapToDouble(p -> p.getUnitPrice() * p.getStockQuantity()).sum();
+            double avgPrice = totalQty == 0 ? 0 : totalValue / totalQty;
+
+            metrics.add(new InventoryMetric(category, totalQty, totalValue, avgPrice));
+
+            overallTotalProducts += totalQty;
+            overallTotalValue += totalValue;
+        }
+
+        // Adding overall metrics
+        double overallAvgPrice = overallTotalProducts == 0 ? 0 : overallTotalValue / overallTotalProducts;
+        metrics.add(new InventoryMetric("Overall", overallTotalProducts, overallTotalValue, overallAvgPrice));
+
+        return metrics;
+    }
+
 
 }
