@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import { ProductTable } from '../components/ProductTable/ProductTable'
 import ProductFilters from '../components/ProductFilters/ProductFilters'
 import ProductForm from '../components/ProductForm/ProductForm'
+import InventoryMetrics from '../components/InventoryMetrics/InventoryMetrics'
 
 import type { Product } from '../types/product'
 import { deleteProduct, fetchPaginatedProducts, createProduct, updateProduct, fetchFilteredProducts} from '../services/productService'
@@ -60,7 +61,7 @@ export default function ProductListPage() {
             setIsFormOpen(false);
             setEditingProduct(undefined);
         } catch (err: any) {
-            alert(err.message); // ejemplo: "A product with this name already exists"
+            alert(err.message); // example: "A product with this name already exists"
         }
     };
 
@@ -155,7 +156,7 @@ export default function ProductListPage() {
                     } else {
                         await createProduct(updatedProduct)
                     }
-                    await fetchProducts()  // refresca la tabla si tienes esta función
+                    await fetchProducts()  // refresh product list
                     } catch (error) {
                     console.error("Error saving product", error)
                     } finally {
@@ -193,6 +194,8 @@ export default function ProductListPage() {
                 product={editingProduct}
                 existingCategories={[...new Set(products.map((p) => p.category))]}
             />
+
+            <InventoryMetrics />
         </Container>
     )
 }

@@ -1,5 +1,6 @@
 import axios from 'axios';
 import type { Product, PaginatedResponse } from '../types/product'
+import type { InventoryMetric } from '../types/metrics'
 
 const API_BASE_URL = "http://localhost:9090/products";
 
@@ -50,7 +51,7 @@ export async function updateProduct(id: number, product: any) {
 }
 
 export async function deleteProduct(id: number) {
-    const response = await fetch(`http://localhost:9090/products/${id}`, {
+    const response = await fetch(`${API_BASE_URL}/${id}`, {
         method: 'DELETE'
     })
 
@@ -74,10 +75,20 @@ export async function fetchFilteredProducts(filters: {
         params.append('inStock', String(filters.inStock))
     }
 
-    const response = await fetch(`http://localhost:9090/products?${params.toString()}`)
+    const response = await fetch(`${API_BASE_URL}?${params.toString()}`)
 
     if (!response.ok) {
         throw new Error('Failed to fetch filtered products')
+    }
+
+    return response.json()
+}
+
+export async function fetchInventoryMetrics(): Promise<InventoryMetric[]> {
+    const response = await fetch(`${API_BASE_URL}/metrics`)
+
+    if (!response.ok) {
+        throw new Error("Error fetching inventory metrics")
     }
 
     return response.json()
