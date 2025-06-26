@@ -66,7 +66,7 @@ export function ProductTable({ products, onEdit, onDelete, onToggleStock }: Prop
                     <Checkbox
                         checked={isOutOfStock}
                         onChange={(e) =>
-                        onToggleStock(Number(p.id), !e.target.checked)
+                            onToggleStock(Number(p.id), e.target.checked)
                         }
                         inputProps={{ 'aria-label': 'Toggle stock status' }}
                     />

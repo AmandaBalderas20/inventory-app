@@ -42,6 +42,27 @@ export default function ProductListPage() {
             })
     }
 
+    const handleToggleStock = async (id: number, outOfStock: boolean) => {
+        const productToUpdate = products.find(p => p.id === id)
+        if (!productToUpdate) return
+
+        const updated = {
+            ...productToUpdate,
+            outOfStock,
+            stockQuantity: outOfStock ? 0 : 10
+        }
+
+        try {
+            await updateProduct(id, updated)
+            const data = await fetchPaginatedProducts(page, 10)
+            setProducts(data.content)
+            setTotalPages(data.totalPages)
+        } catch (err: any) {
+            alert(err.message || 'Error updating product stock status')
+        }
+    }
+
+
     const handleSave = async (productData: Product) => {
         try {
             if (productData.id) {
@@ -166,15 +187,13 @@ export default function ProductListPage() {
             />
 
             <ProductTable
-            products={products}
-            onEdit={(product) => {
-                setSelectedProduct(product)
-                setDialogOpen(true)
-            }}
-            onDelete={handleDelete}
-            onToggleStock={(id, inStock) =>
-                alert(`Marcar ${id} como ${inStock ? 'en stock' : 'sin stock'}`)
-            }
+                products={products}
+                onEdit={(product) => {
+                    setSelectedProduct(product)
+                    setDialogOpen(true)
+                }}
+                onDelete={handleDelete}
+                onToggleStock={handleToggleStock}
             />
             
             <Stack spacing={2} alignItems="center" mt={4}>
