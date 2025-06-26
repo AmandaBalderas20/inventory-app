@@ -22,6 +22,10 @@ export default function ProductListPage() {
     const allCategories = [...new Set(products.map(p => p.category))]
     const [isFormOpen, setIsFormOpen] = useState(false)
     const [editingProduct, setEditingProduct] = useState<Product | undefined>(undefined)
+    const [sortBy1, setSortBy1] = useState<string | undefined>()
+    const [direction1, setDirection1] = useState<'asc' | 'desc' | undefined>()
+    const [sortBy2, setSortBy2] = useState<string | undefined>()
+    const [direction2, setDirection2] = useState<'asc' | 'desc' | undefined>()
 
 
     function handleDelete(id: number) {
@@ -117,7 +121,7 @@ export default function ProductListPage() {
 
     useEffect(() => {
         setLoading(true)
-        fetchPaginatedProducts(page, 10)
+        fetchPaginatedProducts(page, 10, sortBy1, direction1, sortBy2, direction2)
         .then((data) => {
             setProducts(data.content)
             setTotalPages(data.totalPages)
@@ -127,7 +131,7 @@ export default function ProductListPage() {
             alert("An error occurred while fetching products")
         })
         .finally(() => setLoading(false))
-    }, [page])
+    }, [page, sortBy1, direction1, sortBy2, direction2])
 
     if (loading) return <p className="p-4">Loading...</p>
 
@@ -194,6 +198,41 @@ export default function ProductListPage() {
                 }}
                 onDelete={handleDelete}
                 onToggleStock={handleToggleStock}
+                sortBy1={sortBy1 || ''}
+                direction1={direction1 || 'asc'}
+                sortBy2={sortBy2 || ''}
+                direction2={direction2 || 'asc'}
+                
+                onSortChange={(column) => {
+                    if (sortBy1 === column) {
+                        if (direction1 === 'asc') {
+                            setDirection1('desc')
+                        } else if (direction1 === 'desc') {
+                            setSortBy1(undefined)
+                            setDirection1(undefined)
+                        } else {
+                            setDirection1('asc')
+                        }
+                    } else if (sortBy2 === column) {
+                        if (direction2 === 'asc') {
+                            setDirection2('desc')
+                        } else if (direction2 === 'desc') {
+                            setSortBy2(undefined)
+                            setDirection2(undefined)
+                        } else {
+                            setDirection2('asc')
+                        }
+                    } else if (!sortBy1) {
+                        setSortBy1(column)
+                        setDirection1('asc')
+                    } else if (!sortBy2) {
+                        setSortBy2(column)
+                        setDirection2('asc')
+                    } else {
+                        setSortBy2(column)
+                        setDirection2('asc')
+                    }
+                }}
             />
             
             <Stack spacing={2} alignItems="center" mt={4}>

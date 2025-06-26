@@ -4,10 +4,34 @@ import type { InventoryMetric } from '../types/metrics'
 
 const API_BASE_URL = "http://localhost:9090/products";
 
-export const fetchPaginatedProducts = async (page: number, size: number) => {
-    const response = await axios.get<PaginatedResponse<Product>>(`${API_BASE_URL}/paginated?page=${page}&size=${size}`);
-    return response.data;
-};
+export const fetchPaginatedProducts = async (
+    page: number,
+    size: number,
+    sortBy1?: string,
+    direction1?: 'asc' | 'desc',
+    sortBy2?: string,
+    direction2?: 'asc' | 'desc'
+    ) => {
+    const params = new URLSearchParams({
+        page: page.toString(),
+        size: size.toString(),
+    })
+
+    if (sortBy1 && direction1) {
+        params.append('sortBy1', sortBy1)
+        params.append('direction1', direction1)
+    }
+
+    if (sortBy2 && direction2) {
+        params.append('sortBy2', sortBy2)
+        params.append('direction2', direction2)
+    }
+
+    const response = await axios.get<PaginatedResponse<Product>>(
+        `${API_BASE_URL}/paginated?${params.toString()}`
+    )
+    return response.data
+}
 
 export async function getAllProducts() {
     const response = await fetch(API_BASE_URL);

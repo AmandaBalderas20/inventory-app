@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
+import java.util.Comparator;
 
 @Service
 @Validated
@@ -108,8 +109,19 @@ public class ProductService {
      * @param id The ID of the product to retrieve.
      * @return The product with the specified ID.
      */
-    public PageResponse<Product> getPaginatedProducts(int page, int size) {
+    public PageResponse<Product> getPaginatedProducts(int page, int size, String sortBy1, String direction1, String sortBy2, String direction2) {
         List<Product> allProducts = this.repository.findAll();
+        
+        Comparator<Product> comparator = Comparator.comparing(Product::getId); // default (no-op)
+
+        if (sortBy1 != null) {
+            comparator = getComparator(sortBy1, direction1);
+            if (sortBy2 != null) {
+                comparator = comparator.thenComparing(getComparator(sortBy2, direction2));
+            }
+            allProducts = allProducts.stream().sorted(comparator).toList();
+        }
+        
         int fromIndex = page * size;
         int toIndex = Math.min(fromIndex + size, allProducts.size());
 
@@ -120,6 +132,27 @@ public class ProductService {
         List<Product> paginatedList = allProducts.subList(fromIndex, toIndex);
 
         return new PageResponse<>(paginatedList, page, size, allProducts.size());
+    }
+
+    /**
+     * Returns a comparator based on the specified field and direction.
+     * @param field The field to sort by (e.g., "name", "category", "unitPrice", etc.).
+     * @param direction The direction of sorting ("asc" or "desc").
+     * @return A Comparator for the Product class.
+     */
+    private Comparator<Product> getComparator(String field, String direction) {
+        boolean asc = direction == null || direction.equalsIgnoreCase("asc");
+
+        Comparator<Product> comparator = switch (field) {
+            case "name" -> Comparator.comparing(Product::getName, String.CASE_INSENSITIVE_ORDER);
+            case "category" -> Comparator.comparing(Product::getCategory, String.CASE_INSENSITIVE_ORDER);
+            case "unitPrice" -> Comparator.comparing(Product::getUnitPrice);
+            case "stockQuantity" -> Comparator.comparing(Product::getStockQuantity);
+            case "expirationDate" -> Comparator.comparing(p -> p.getExpirationDate() != null ? p.getExpirationDate() : LocalDate.MAX);
+            default -> Comparator.comparing(Product::getId); // fallback
+        };
+
+        return asc ? comparator : comparator.reversed();
     }
 
     /**
