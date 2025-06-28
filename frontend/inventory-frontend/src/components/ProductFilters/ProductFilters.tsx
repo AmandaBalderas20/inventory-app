@@ -55,13 +55,15 @@ export default function ProductFilters({ onSearch, existingCategories }: Props) 
         />
 
         <FormControl sx={{ minWidth: 200 }}>
-            <InputLabel>Category</InputLabel>
+            <InputLabel id="category-label">Category</InputLabel>
             <Select
-            multiple
-            value={categories}
-            onChange={(e) => setCategories(e.target.value as string[])}
-            input={<OutlinedInput label="Category" />}
-            renderValue={(selected) => selected.join(', ')}
+                labelId="category-label"
+                id="category-select"
+                multiple
+                value={categories}
+                onChange={(e) => setCategories(e.target.value as string[])}
+                input={<OutlinedInput label="Category" />}
+                renderValue={(selected) => selected.join(', ')}
             >
             {existingCategories.map((cat) => (
                 <MenuItem key={cat} value={cat}>
@@ -73,11 +75,13 @@ export default function ProductFilters({ onSearch, existingCategories }: Props) 
         </FormControl>
 
         <FormControl sx={{ minWidth: 150 }}>
-            <InputLabel>Availability</InputLabel>
+            <InputLabel id="availability-label">Availability</InputLabel>
             <Select
-            value={availability}
-            onChange={(e) => setAvailability(e.target.value)}
-            label="Availability"
+                labelId="availability-label"
+                id="availability-select"
+                value={availability}
+                onChange={(e) => setAvailability(e.target.value)}
+                label="Availability"
             >
             <MenuItem value="all">All</MenuItem>
             <MenuItem value="inStock">In Stock</MenuItem>

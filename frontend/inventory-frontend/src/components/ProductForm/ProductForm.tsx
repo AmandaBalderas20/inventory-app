@@ -86,8 +86,9 @@ export default function ProductFormDialog({
             <TextField label="Name" name="name" value={form.name} onChange={handleInputChange} fullWidth />
 
             <FormControl fullWidth>
-            <InputLabel>Category</InputLabel>
+            <InputLabel id='category-label'>Category</InputLabel>
             <Select
+                labelId="category-label"
                 label="Category"
                 name="category"
                 value={form.category}
