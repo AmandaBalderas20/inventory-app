@@ -1,8 +1,6 @@
 package com.example.inventory_service.controller;
 
-
 import com.example.inventory_service.model.Product;
-import com.example.inventory_service.repository.InMemoryProductRepository;
 import com.example.inventory_service.service.ProductService;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -29,14 +27,17 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebMvcTest(ProductController.class)
 public class ProductControllerTest {
 
+    // MockMvc is used to simulate HTTP requests in tests
     @Autowired
     private MockMvc mockMvc;
 
+    // MockBean is used to create a mock of the ProductService
     @MockBean
-    private ProductService productService; // inyectado por el controller
+    private ProductService productService; 
 
     private Product product;
 
+    // This method runs before each test to set up the initial state of the product
     @BeforeEach
     public void setUp() {
         product = new Product();
@@ -48,6 +49,7 @@ public class ProductControllerTest {
         product.setExpirationDate(LocalDate.now().plusDays(5));
     }
 
+    // Test methods to verify the behavior of the ProductController
     @Test
     public void testCreateProduct() throws Exception {
         given(productService.createProduct(any(Product.class))).willReturn(product);
@@ -60,6 +62,7 @@ public class ProductControllerTest {
             .andExpect(jsonPath("$.category").value("Lácteos"));
     }
 
+    // Test to verify that the controller returns a product by its ID
     @Test
     public void testGetAllProducts() throws Exception {
         given(productService.getAllProducts()).willReturn(List.of(product));
@@ -70,8 +73,9 @@ public class ProductControllerTest {
             .andExpect(jsonPath("$[0].name").value("Leche"));
     }
 
-    // Utilidad para convertir objeto a JSON
-    
+    // Utility to convert object to JSON
+
+    // This method converts an object to a JSON string using Jackson's ObjectMapper
     private static String asJsonString(final Object obj) {
     try {
         ObjectMapper mapper = new ObjectMapper();
