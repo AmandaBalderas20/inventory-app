@@ -2,7 +2,6 @@
 
 ## 🗓️ Inventory Management Project – Development Schedule
 This project aims to build an Inventory Management Application using React + TypeScript on the frontend and Java + Spring Boot on the backend. 
-Below is the detailed development plan followed to complete the project within 8 days.
 
 ## ✅ Project Goal
 Deliver a fully functional application that allows users to create, edit, filter, sort, and view inventory products, along with key inventory metrics and a user-friendly interface.
