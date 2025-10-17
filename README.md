@@ -86,12 +86,28 @@ Backend:
 - In-memory storage (Java Collections)
 
 ## 📦 Run Commands
-Frontend
-- `npm install`
-- `npm run start`     # Runs the app on port 8080
-- `npm run tests`     # Executes frontend tests
+### Frontend
+#### 1. Navigate into the frontend directory
+`cd frontend`
 
-Backend
-- `mvn clean install`
-- `mvn spring-boot:run`   # Runs the app on port 9090
-- `mvn test`              # Executes backend tests
+#### 2. Install the necessary dependencies (run this only once)
+`npm install`
+
+#### 3. Runs the React application in development mode
+`npm run start`     # Runs the app on port 8080
+
+#### 4. Executes the unit and integration tests for the frontend
+`npm run tests`     # Executes frontend tests
+
+### Backend
+#### 1. Navigate into the backend directory
+`cd inventory-app`
+
+#### 2. Clean the project and build the necessary JAR file
+`mvn clean install`
+
+#### 3. Runs the Spring Boot application (includes the embedded server)
+`mvn spring-boot:run`   # Runs the app on port 9090
+
+#### 4. Executes the unit and integration tests for the backend
+`mvn test`              # Executes backend tests
