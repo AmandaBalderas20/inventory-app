@@ -7,10 +7,14 @@ import com.example.inventory_service.dto.PageResponse;
 
 import jakarta.validation.Valid;
 import java.util.List;
+import java.util.NoSuchElementException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+/**
+ * Controller class for handling product-related API endpoints.
+ */
 @RestController
 @RequestMapping("/products")
 public class ProductController {
@@ -32,9 +36,16 @@ public class ProductController {
      * @return the created product
      */
     @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    public Product createProduct(@Valid @RequestBody Product product) {
-        return productService.createProduct(product);
+    public ResponseEntity<?> createProduct(@Valid @RequestBody Product product) {
+        try {
+            Product created = productService.createProduct(product);
+            return ResponseEntity.status(HttpStatus.CREATED).body(created);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                                .body("Unexpected error while creating product: " + e.getMessage());
+        }
     }
 
     /**
@@ -46,18 +57,21 @@ public class ProductController {
      * @return a list of products matching the criteria
      */
     @GetMapping
-    public ResponseEntity<List<Product>> getProducts(
+    public ResponseEntity<?> getProducts(
         @RequestParam(required = false) String name,
         @RequestParam(required = false) List<String> category,
         @RequestParam(required = false) Boolean inStock
     ) {
-        List<Product> products = productService.getProductsByFilters(name, category, inStock);
-
-        if (products.isEmpty()) {
-            return ResponseEntity.noContent().build();
+        try {
+            List<Product> products = productService.getProductsByFilters(name, category, inStock);
+            if (products.isEmpty()) {
+                return ResponseEntity.noContent().build();
+            }
+            return ResponseEntity.ok(products);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                                .body("Error retrieving products: " + e.getMessage());
         }
-
-        return ResponseEntity.ok(products);
     }
 
     /**
@@ -68,8 +82,18 @@ public class ProductController {
      * @return the updated product
      */
     @PutMapping("/{id}")
-    public Product updateProduct(@PathVariable Long id, @Valid @RequestBody Product updatedProduct) {
-        return productService.updateProduct(id, updatedProduct);
+    public ResponseEntity<?> updateProduct(@PathVariable Long id, @Valid @RequestBody Product updatedProduct) {
+        try {
+            Product updated = productService.updateProduct(id, updatedProduct);
+            return ResponseEntity.ok(updated);
+        } catch (NoSuchElementException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                                .body("Unexpected error while updating product: " + e.getMessage());
+        }
     }
 
     /**
@@ -78,9 +102,16 @@ public class ProductController {
      * @param id the ID of the product to delete
      */
     @DeleteMapping("/{id}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteProduct(@PathVariable Long id) {
-        productService.deleteById(id);
+    public ResponseEntity<?> deleteProduct(@PathVariable Long id) {
+        try {
+            productService.deleteById(id);
+            return ResponseEntity.noContent().build();
+        } catch (NoSuchElementException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                                .body("Error deleting product: " + e.getMessage());
+        }
     }
 
     /**
@@ -91,7 +122,7 @@ public class ProductController {
      * @return a PageResponse containing the products for the specified page
      */
     @GetMapping("/paginated")
-    public PageResponse<Product> getPaginatedProducts(
+    public ResponseEntity<?> getPaginatedProducts(
         @RequestParam int page,
         @RequestParam int size,
         @RequestParam(required = false) String sortBy1,
@@ -99,11 +130,28 @@ public class ProductController {
         @RequestParam(required = false) String sortBy2,
         @RequestParam(required = false) String direction2
     ) {
-        return productService.getPaginatedProducts(page, size, sortBy1, direction1, sortBy2, direction2);
+        try {
+            PageResponse<Product> response = productService.getPaginatedProducts(page, size, sortBy1, direction1, sortBy2, direction2);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                                .body("Error retrieving paginated products: " + e.getMessage());
+        }
     }
 
+    /**
+     * Retrieves inventory metrics such as total quantity and average prices grouped by category.
+     *
+     * @return a list of InventoryMetric objects containing the calculated metrics
+     */
     @GetMapping("/metrics")
-    public List<InventoryMetric> getInventoryMetrics() {
-        return productService.getInventoryMetrics();
+    public ResponseEntity<?> getInventoryMetrics() {
+        try {
+            List<InventoryMetric> metrics = productService.getInventoryMetrics();
+            return ResponseEntity.ok(metrics);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                                .body("Error retrieving inventory metrics: " + e.getMessage());
+        }
     }
 }
