@@ -1,15 +1,14 @@
 package com.example.inventory_service.controller;
+
 import com.example.inventory_service.model.InventoryMetric;
 import com.example.inventory_service.model.Product;
 import com.example.inventory_service.service.ProductService;
 import com.example.inventory_service.dto.PageResponse;
 
-
 import jakarta.validation.Valid;
-
 import java.util.List;
-
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -47,22 +46,26 @@ public class ProductController {
      * @return a list of products matching the criteria
      */
     @GetMapping
-    public List<Product> getProducts(
+    public ResponseEntity<List<Product>> getProducts(
         @RequestParam(required = false) String name,
         @RequestParam(required = false) List<String> category,
         @RequestParam(required = false) Boolean inStock
     ) {
-        if (name == null && (category == null || category.isEmpty()) && inStock == null) {
-            return productService.getAllProducts();
+        List<Product> products = productService.getProductsByFilters(name, category, inStock);
+
+        if (products.isEmpty()) {
+            return ResponseEntity.noContent().build();
         }
-        return productService.getFilteredProducts(name, category, inStock);
+
+        return ResponseEntity.ok(products);
     }
 
     /**
-     * Retrieves a product by its ID.
+     * Updates a product by its ID.
      *
-     * @param id the ID of the product to retrieve
-     * @return the product with the specified ID
+     * @param id the ID of the product to update
+     * @param updatedProduct the new product data
+     * @return the updated product
      */
     @PutMapping("/{id}")
     public Product updateProduct(@PathVariable Long id, @Valid @RequestBody Product updatedProduct) {
@@ -100,9 +103,7 @@ public class ProductController {
     }
 
     @GetMapping("/metrics")
-        public List<InventoryMetric> getInventoryMetrics() {
-            return productService.getInventoryMetrics();
+    public List<InventoryMetric> getInventoryMetrics() {
+        return productService.getInventoryMetrics();
     }
-
-
 }

@@ -71,6 +71,28 @@ public class ProductService {
     }
 
     /**
+     * Determines whether to retrieve all products or apply filters based on the provided parameters.
+     * <p>
+     * If all filter parameters are {@code null} or empty, this method delegates to {@link #getAllProducts()}.
+     * Otherwise, it calls {@link #getFilteredProducts(String, List, Boolean)} with the provided arguments.
+     * </p>
+     *
+     * @param name       the product name to filter by (optional, may be {@code null})
+     * @param categories the list of product categories to filter by (optional, may be {@code null} or empty)
+     * @param inStock    whether to filter products that are in stock (optional, may be {@code null})
+     * @return a list of products matching the given filters, or all products if no filters are provided
+     */
+    public List<Product> getProductsByFilters(String name, List<String> categories, Boolean inStock) {
+        boolean noFilters = name == null && (categories == null || categories.isEmpty()) && inStock == null;
+
+        if (noFilters) {
+            return getAllProducts();
+        }
+
+        return getFilteredProducts(name, categories, inStock);
+    }
+
+    /**
      * Updates an existing product.
      * @param id The ID of the product to update.
      * @param updatedProduct The product object containing updated details.
